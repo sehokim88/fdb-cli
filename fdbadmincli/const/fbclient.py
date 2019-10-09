@@ -1,4 +1,6 @@
-from .config import *
+from .basic import root
+import yaml
+import logging
 from base64 import b64encode
  
 
@@ -11,3 +13,5 @@ app_creds = config_yaml['app']
 client_id = app_creds['client_id']
 client_secret = app_creds['client_secret']
 encoded_client_cred = b64encode(bytes(f'{client_id}:{client_secret}', 'utf'))
+
+logging.debug('> Importing fbclient constants...')

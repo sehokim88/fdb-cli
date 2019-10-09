@@ -1,25 +1,20 @@
+from const.basic import root
+from const import identity, fbclient
+import os
+import sys
+import logging
+from getpass import getpass
 import time
 import random
-import os
-import base64
-import json
-import yaml
 from selenium.webdriver import Firefox
 from selenium.webdriver.support.ui import WebDriverWait
 
 
 
-with open('var/config.yaml', 'r') as f:
-    config = yaml.load(f)
-    app_creds = config['app']
-
-client_id = app_creds['client_id']
-client_secret = app_creds['client_secret']
-encoded_client_cred = base64.b64encode(bytes(f'{client_id}:{client_secret}', 'utf'))
 
 
-with open('var/users.yaml', 'r') as f:
-    users = yaml.load(f)
+
+
 
 
 
@@ -34,7 +29,7 @@ def login(email, password):
 
     # Open the login page.
     browser = Firefox()
-    login_url = f"https://www.fitbit.com/oauth2/authorize?response_type=code&client_id={client_id}&redirect_uri=http%3A%2F%2F127.0.0.1%3A5000&scope=sleep%20heartrate&expires_in=604800"
+    login_url = f"https://www.fitbit.com/oauth2/authorize?response_type=code&client_id={fbclient.client_id}&redirect_uri=http%3A%2F%2F127.0.0.1%3A5000&scope=sleep%20heartrate&expires_in=604800"
     browser.get(login_url)
 
     # Type in email ID.
@@ -77,7 +72,7 @@ def login(email, password):
 
 
 
-class AuthAppServer:
+class AuthClient:
     """Auth Server that handles Code and Tokens.
     """
     @classmethod    
@@ -86,7 +81,7 @@ class AuthAppServer:
         server_ps = open('var/ps.txt').read()
 
         if '127.0.0.1.5000' not in server_ps: 
-            os.system('flask run &')
+            os.system('python authclient.py &')
             
         else:
             raise Exception
@@ -117,10 +112,18 @@ class AuthAppServer:
 
 
 if __name__ == "__main__":
+
+
+    if identity.type == 'subject': 
+        pass
+    else:
+        logging.error('Only subject user can get a token.')
+        sys.exit()
+
     # Start the Server
     try: 
         print('> starting the server...')
-        AuthAppServer.prop()
+        AuthClient.prop()
     except: 
         print('> server running')
     time.sleep(3)
@@ -128,32 +131,20 @@ if __name__ == "__main__":
 
 
 
+    fitbit_email = input('fitbit email: ')
+    fitbit_pwd = getpass('fitbit pwd: ')
 
 
 
 
-    # # Log in
-    # for user in users:
-    #     email = user['email']
-    #     password = user['password']
-    #     try: 
-    #         print(f"> logging in: {email}")
-    #         login(email, password)
-    #     except: 
-    #         print("> something went wrong, please try again.")
 
 
-    for user_id in users.keys():
-        account_id = users[user_id]['accountID']
-        password = users[user_id]['password']
-        try: 
-            with open('var/user_id.txt', 'w+') as f:
-                f.write(user_id)
-            print(f"> logging in: {account_id}")
-            login(account_id, password)
-            
-        except: 
-            print("> something went wrong, please try again.")
+
+    try:
+        login(fitbit_email, fitbit_pwd)
+        
+    except: 
+        print("> Something went wrong, please try again.")
 
 
 
@@ -167,6 +158,6 @@ if __name__ == "__main__":
     # end the server
     try: 
         print('> shutting down the server...')
-        AuthAppServer.shut()
+        AuthClient.shut()
     except: 
         print('> server not found')

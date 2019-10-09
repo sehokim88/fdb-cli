@@ -1,4 +1,6 @@
-from .config import *
+from .basic import root
+import yaml
+import logging
 import psycopg2 as pg
 
 
@@ -13,6 +15,8 @@ db_user_id = db['user_id']
 db_pwd = db['password']
 
 
-logging.info('> connecting to DB...')
+logging.debug('> Connecting to DB...')
 conn = pg.connect(host=db_host, port=db_port, user=db_user_id, database=db_name, password=db_pwd)
+
+logging.debug('> Importing DB connection...')
 

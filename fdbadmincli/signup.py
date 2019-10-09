@@ -1,8 +1,11 @@
-from lib.config import *
-from lib.db_conn import conn
+from const.basic import root
+from const import dbconn
+import logging
+import sys
 from getpass import getpass
 from datetime import datetime
 import string
+
 
 
 
@@ -168,19 +171,19 @@ class SignUpForm:
         if self._check_form():
             pass
         else: 
-            logging.error('submit the form after filling out.')
+            logging.error('Form is not complete yet, please complete the form first.')
             sys.exit()
 
         cur = self.db_conn.cursor()
-        logging.info('Submitting the Form...')
+        logging.info('> Submitting the Form...')
 
         if self.type == 'subject':
             
-            logging.debug('Inserting passwords into the database...')
+            logging.debug('> Inserting passwords into the database...')
             cur.execute(f'''INSERT INTO sj_pwds VALUES (default, '{self.pwd}') RETURNING id;''')
             pwd_id = cur.fetchone()[0]
 
-            logging.debug('Inserting user info into the database...')
+            logging.debug('> Inserting user info into the database...')
             cur.execute(f'''INSERT INTO subjects VALUES (
                             default, 
                             '{self.first_name}', 
@@ -193,25 +196,25 @@ class SignUpForm:
 
         else: 
 
-            logging.debug('Inserting passwords into the database...')
+            logging.debug('> Inserting passwords into the database...')
             cur.execute(f'''INSERT INTO ss_pwds VALUES (default, '{self.pwd}') RETURNING id;''')
             pwd_id = cur.fetchone()[0]
 
             if self.role == 'null':
                 role_id = 'null'
             else: 
-                logging.debug('Checking if role exist in the database...')
+                logging.debug('> Checking if role exist in the database...')
                 cur.execute(f'''SELECT id FROM roles WHERE role = '{self.role}';''')
                 role_exist = 1 if cur.fetchone() != None else 0
                 if role_exist: 
-                    logging.debug('Role already exist in the DB.')
+                    logging.debug('> Role already exist in the DB.')
                     role_id = cur.fetchone()[0]
                 else:
-                    logging.debug('Role does not exist in the DB, inserting now...')
+                    logging.debug('> Role does not exist in the DB, inserting now...')
                     cur.execute(f'''INSERT INTO roles VALUES (default, '{self.role}') RETURNING id;''')
                     role_id = cur.fetchone()[0]
 
-            logging.debug('Inserting user info into the database...')
+            logging.debug('> Inserting user info into the database...')
             cur.execute(f'''INSERT INTO subscribers VALUES (
                             default, 
                             '{self.first_name}', 
@@ -228,7 +231,10 @@ class SignUpForm:
 if __name__ == '__main__':
 
 
-    form = SignUpForm(conn)
+
+    logging.info('> Welcome, please sign up to use the service.')
+
+    form = SignUpForm(dbconn.conn)
 
     form.get_type('type (subject or subscriber): ')
     if form.type == 'subject':
@@ -248,9 +254,10 @@ if __name__ == '__main__':
         form.get_value('role (type "null" if not applicable): ', 'role')
 
     form.submit()
-    logging.debug('Commit and Close DB...')
-    conn.commit()
-    conn.close()
+
+    logging.debug('> Committing and closing DB...')
+    dbconn.conn.commit()
+    dbconn.conn.close()
 
 
 

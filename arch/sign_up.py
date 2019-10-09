@@ -1,4 +1,4 @@
-from lib.config import *
+from lib.config import root
 from lib.db_conn import conn
 from getpass import getpass
 from datetime import datetime
@@ -91,113 +91,12 @@ def check_email(email, db_conn, table):
 
 
 
-class SignUpSheet:
-    def __init__(self, type):
-        self.type = type
-        self.email = None
-        self.pwd = None
-        self.first_name = None
-        self.last_name = None
-        self.dob = None
-        self.role = None
-        self.ss_id = None
 
 
+        
 
-    def get_email(self, prompt, db_conn):
-        attempts = 0
-        while attempts < 5:
-            value = input(f'{prompt}')
-            cond1 = len(value.replace(' ', '')) > 0
-            cond2 = sum([l in ['@','.'] for l in value]) == 2
-            attempts += 1
-            if not cond1:
-                logging.info('Input must contain a value whose length is greater than 0.')
-            elif not cond2:
-                logging.info('Must enter a full email address.')
-            elif cond1 and cond2:
-                email_avail = self._check_email(value, db_conn, self.type)
-                if email_avail:
-                    self.email = value
-                    break
-                else:
-                    logging.info('That email is already taken.')
-        if attempts == 5:
-            sys.exit()
-
-
-
-    def get_pwd(self, prompt):
-        retype_attempts = 0
-        while retype_attempts < 5:
-            values = []
-            for i in range(2):
-                attempts = 0
-                while attempts < 5:
-                    if i == 1: 
-                        value = getpass(f'{prompt} (retype)')
-                    else:
-                        value = getpass(f'{prompt}')
-                    cond1 = len(value) > 6
-                    cond2 = sum([l in string.ascii_letters for l in value]) > 0
-                    cond3 = sum([d in string.digits for d in value]) > 0
-                    attempts += 1
-                    if cond1 and cond2 and cond3:
-                        values.append(value)
-                        break
-                    else: 
-                        logging.warning('Password must contain at least one letter and one digit and longer than 6 letter-digit combinations.')
-                if attempts == 5: sys.exit()
-            retype_attempts += 1
-            if values[0] == values[1]: 
-                self.pwd = values[0]
-                break
-            else: 
-                logging.warning('Two passwords do not match, try again.')
-        if retype_attempts == 5: sys.exit()
-
-
-
-    def get_input(self):
-        attempts = 0
-        while attempts < 5:
-            value = input(f'{prompt}') 
-            cond1 = len(value.replace(' ', '')) > 0
-            attempts += 1
-            if cond1:
-                if not is_date and not is_email:
-                    return value
-                elif is_date and not is_email:
-                    try:
-                        cond2 = sum([l == '-' for l in value]) == 2
-                        cond3 = int(value.split('-')[0]) > 1000 and int(value.split('-')[0]) < 3000
-                        cond4 = int(value.split('-')[1]) > 0 and int(value.split('-')[1]) <= 12
-                        cond5 = int(value.split('-')[2]) > 0 and int(value.split('-')[2]) <= 31
-                        if is_date and cond1 and cond2 and cond3 and cond4 and cond5:
-                            return value
-                        else: 
-                            logging.warning('Date input must be in correct format (YYYY-MM-DD).')    
-                    except: 
-                        logging.warning('Date input must be in correct format (YYYY-MM-DD).')
-                elif is_email and not is_date:
-                    cond6 = sum([l in ['@','.'] for l in value]) == 2
-                    if cond6:
-                        return value
-                    else: 
-                        logging.warning('Must enter full email address.')
-            else: 
-                logging.warning('Input must contain a value whose length is greater than 0.')  
-        if attempts == 5: sys.exit()
-
-
-
-
-    def _check_email(self, email, db_conn, table):
-        cur = db_conn.cursor()
-        cur.execute(f'''SELECT email FROM {table} WHERE email = '{email}';''')
-        query_output = cur.fetchone()
-        email_usability = 0 if query_output != None else 1
-        return email_usability
+        
+            
 
 
 
@@ -205,10 +104,7 @@ class SignUpSheet:
 
 
 
-
-
-
-
+     
 
 
 

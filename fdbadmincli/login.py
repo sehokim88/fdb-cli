@@ -1,13 +1,16 @@
-from lib.config import *
-from lib.db_conn import conn
+from const.basic import root
+from const import dbconn
 from getpass import getpass
+import logging
+import sys
+import json
 
 
-# python login.py {account_type} {email} {pwd}
 
 
 
-logging.info('Hello, please login to use the service.')
+
+logging.info('> Hello, please login to use the service.')
 
 
 
@@ -29,7 +32,7 @@ account_type_verified = 1 if account_type in ['subscriber', 'subject'] else 0
 
 
 
-cur = conn.cursor()
+cur = dbconn.conn.cursor()
 
 
 
@@ -103,7 +106,7 @@ if password_verified == 1:
     user_cred = cur.fetchone()
     first_name = user_cred[1]
     logging.info(f'Welcome, {first_name.capitalize()}')
-    identity = {'account_type_abb' : account_type_abb, 'user_id' : user_cred[0], 'user_name' : user_cred[1]}
+    identity = {'type' : account_type, 'id' : user_cred[0], 'name' : user_cred[1]}
     with open(f'{root}/var/identity.json', '+w') as f:
         json.dump(identity, f)
     
@@ -116,7 +119,7 @@ else:
 
 
 cur.close()
-conn.close()
+dbconn.conn.close()
 
 
 
