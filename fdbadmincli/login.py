@@ -1,4 +1,4 @@
-from const.basic import root
+from const.basic import ROOT
 from const import dbconn
 from getpass import getpass
 import logging
@@ -32,7 +32,7 @@ account_type_verified = 1 if account_type in ['subscriber', 'subject'] else 0
 
 
 
-cur = dbconn.conn.cursor()
+cur = dbconn.CONN.cursor()
 
 
 
@@ -107,7 +107,7 @@ if password_verified == 1:
     first_name = user_cred[1]
     logging.info(f'Welcome, {first_name.capitalize()}')
     identity = {'type' : account_type, 'id' : user_cred[0], 'name' : user_cred[1]}
-    with open(f'{root}/var/identity.json', '+w') as f:
+    with open(f'{ROOT}/var/identity.json', '+w') as f:
         json.dump(identity, f)
     
     
@@ -119,7 +119,7 @@ else:
 
 
 cur.close()
-dbconn.conn.close()
+dbconn.CONN.close()
 
 
 

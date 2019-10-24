@@ -1,4 +1,4 @@
-from const.basic import root
+from const.basic import ROOT
 from const import dbconn
 import logging
 import sys
@@ -234,7 +234,7 @@ if __name__ == '__main__':
 
     logging.info('> Welcome, please sign up to use the service.')
 
-    form = SignUpForm(dbconn.conn)
+    form = SignUpForm(dbconn.CONN)
 
     form.get_type('type (subject or subscriber): ')
     if form.type == 'subject':
@@ -256,8 +256,8 @@ if __name__ == '__main__':
     form.submit()
 
     logging.debug('> Committing and closing DB...')
-    dbconn.conn.commit()
-    dbconn.conn.close()
+    dbconn.CONN.commit()
+    dbconn.CONN.close()
 
 
 

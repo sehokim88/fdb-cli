@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 import requests
 import json
+import logging
 
 
 
@@ -87,7 +88,8 @@ def request_sleep_data(token: dict, start_date: str, end_date: str) -> pd.DataFr
             if 'sleep' in new_data.keys(): 
                 new_df = pd.concat([new_df, pd.DataFrame(new_data['sleep'])])
             else: 
-                raise ValueError(new_data['errors'][0]['message'])
+                logging.error(f'''{new_data['errors'][0]['message']}''')
+                raise Exception
 
         new_df.sort_values('startTime', inplace=True)
         new_df.reset_index(inplace=True, drop=True)
@@ -100,7 +102,8 @@ def request_sleep_data(token: dict, start_date: str, end_date: str) -> pd.DataFr
         if 'sleep' in new_data.keys(): 
             new_df = pd.DataFrame(new_data['sleep'])
         else: 
-            raise ValueError(new_data['errors'][0]['message'])
+            logging.error(f'''{new_data['errors'][0]['message']}''')
+            raise Exception
       
     return new_df
 

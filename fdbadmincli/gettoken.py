@@ -1,4 +1,4 @@
-from const.basic import root
+from const.basic import ROOT
 from const import identity, fbclient
 import os
 import sys
@@ -14,25 +14,17 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 
-
-
-
-
-
-
-
-
-
 def login(email, password):
     """Login Fitbit User Accounts
     """
 
-    # Open the login page.
+    logging.debug('> Opening the browser...') # Open the login page.
     browser = Firefox()
-    login_url = f"https://www.fitbit.com/oauth2/authorize?response_type=code&client_id={fbclient.client_id}&redirect_uri=http%3A%2F%2F127.0.0.1%3A5000&scope=sleep%20heartrate&expires_in=604800"
+    login_url = f"https://www.fitbit.com/oauth2/authorize?response_type=code&client_id={fbclient.CLIENT_ID}&redirect_uri=http%3A%2F%2F127.0.0.1%3A5000&scope=sleep%20heartrate&expires_in=604800"
+    logging.debug('> Accessing the URL...')
     browser.get(login_url)
 
-    # Type in email ID.
+    logging.debug('> Typing the email ID...') # Type in email ID.
     email_input = WebDriverWait(browser, 5).until(lambda x: x.find_element_by_css_selector('input#ember644'))
     # email_input = browser.find_element_by_css_selector('input#ember653')
     for l in email:
@@ -40,17 +32,17 @@ def login(email, password):
         time.sleep(random.random()/4)
     time.sleep(1)
 
-    # Type in password.
+    logging.debug('> Typing the password...') # Type in password.
     password_input = browser.find_element_by_css_selector('input#ember645')
     for l in password:
         password_input.send_keys(l)
         time.sleep(random.random()/3)
     time.sleep(1.2)
 
-    # Click login button.
+    logging.debug('> Clicking the login button...') # Click login button.
     browser.find_element_by_css_selector('button#ember685').click()
 
-    # Check AllScope box if not already selected
+    logging.debug('> Selecting Permission Scope boxes...') # Check AllScope box if not already selected
     try:
         WebDriverWait(browser, 5).until(lambda x: x.find_element_by_css_selector('input#selectAllScope'))
         browser.find_element_by_css_selector('input#selectAllScope').click()
@@ -59,6 +51,7 @@ def login(email, password):
     except:
         pass
         
+    logging.debug('> Shutting the browser...')
     browser.quit()
 
 
@@ -72,33 +65,33 @@ def login(email, password):
 
 
 
-class AuthClient:
-    """Auth Server that handles Code and Tokens.
+class AuthClientToggle:
+    """AuthClient server manager.
     """
     @classmethod    
-    def prop(self):
-        os.system('netstat -anv | grep 127.0.0.1.5000 > var/ps.txt')
-        server_ps = open('var/ps.txt').read()
+    def prop(cls):
+        os.system(f'netstat -anv | grep 127.0.0.1.5000 > {ROOT}/var/authclient.pid')
+        server_ps = open(f'{ROOT}/var/authclient.pid').read()
 
         if '127.0.0.1.5000' not in server_ps: 
+            logging.debug('> Starting the server...')
             os.system('python authclient.py &')
             
         else:
-            raise Exception
-            
+            logging.debug('> Server already running...')
+
     
     @classmethod
-    def shut(self):
-        os.system('netstat -anv | grep 127.0.0.1.5000 > var/ps.txt')
-        server_ps = open('var/ps.txt').read()
+    def shut(cls):
+        os.system(f'netstat -anv | grep 127.0.0.1.5000 > {ROOT}/var/authclient.pid')
+        server_ps = open(f'{ROOT}/var/authclient.pid').read()
         server_pid = server_ps.split(' ')[-7]
-        # server_pid = server_ps.replace(" ", "")[-7:-2]
         
         if '127.0.0.1.5000' in server_ps: 
+            logging.debug('> Shutting the server...')
             os.system(f'kill {server_pid}')
             
-        else: 
-            raise Exception
+            
 
 
 
@@ -114,50 +107,33 @@ class AuthClient:
 if __name__ == "__main__":
 
 
-    if identity.type == 'subject': 
+    # Check the User's Account type
+    if identity.TYPE == 'subject': 
         pass
     else:
         logging.error('Only subject user can get a token.')
         sys.exit()
 
     # Start the Server
-    try: 
-        print('> starting the server...')
-        AuthClient.prop()
-    except: 
-        print('> server running')
+    logging.info('> Starting the server...')
+    AuthClientToggle.prop()
     time.sleep(3)
 
 
-
-
+    # Get creds
     fitbit_email = input('fitbit email: ')
     fitbit_pwd = getpass('fitbit pwd: ')
 
 
-
-
-
-
-
+    # Get token
     try:
+        logging.info('> Logging in...')
         login(fitbit_email, fitbit_pwd)
         
     except: 
-        print("> Something went wrong, please try again.")
-
-
-
-
-
-
-
-
+        logging.info("> Something went wrong, please try again.")
 
 
     # end the server
-    try: 
-        print('> shutting down the server...')
-        AuthClient.shut()
-    except: 
-        print('> server not found')
+    logging.info('> Shutting down the server...')
+    AuthClientToggle.shut()

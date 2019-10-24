@@ -1,10 +1,10 @@
-from .basic import root
+from .basic import ROOT
 import json
 import logging
 import sys
 
 try: 
-    with open(f'{root}/var/identity.json', 'r') as f:
+    with open(f'{ROOT}/var/identity.json', 'r') as f:
         identity = json.load(f)
 
 except: 
@@ -12,10 +12,10 @@ except:
     sys.exit()
 
 else:
-    type = identity['type']
-    id = identity['id']
-    name = identity['name']
-    logging.info(f'> ID verified: {type}, {id}, {name.capitalize()}.')
+    TYPE = identity['type']
+    ID = identity['id']
+    NAME = identity['name']
+    logging.info(f'> ID verified: {TYPE}, {ID}, {NAME.capitalize()}.')
 
 logging.debug('> Importing identity constants...')
 

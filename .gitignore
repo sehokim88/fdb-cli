@@ -1,2 +1,5 @@
-var
+tokens
+arch
 config.yaml
+__pycache__
+geckodriver.log
