@@ -1,3 +1,5 @@
+authclient.pid
+identity.json
 tokens
 arch
 config.yaml

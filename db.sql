@@ -32,20 +32,3 @@ create table subjects (
 );
 
 
--- insert into ss_passwords
--- values (default, 'bs042825');
-
--- insert into subscribers
--- values (default, 'Seho', 'Kim', 'sehokim88@gmail.com', '1991-04-25', 'researcher', 1);
-
--- insert into sj_passwords
--- values (default, 'bs042825');
-
--- insert into subjects
--- values (default, 'Seho', 'Kim', 'sehokim88@gmail.com', '1991-04-25', '7BVHQT', 1, 1);
-
--- insert into sj_passwords
--- values (default, 'bs042825');
-
--- insert into subjects
--- values (default, 'Brittney', 'Kim', 'briwynn28@gmail.com', '1990-04-28', '74NFBJ', 1, 2);
