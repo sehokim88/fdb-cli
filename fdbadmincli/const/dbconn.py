@@ -5,7 +5,7 @@ import psycopg2 as pg
 
 
 with open(f'{ROOT}/var/config.yaml', 'r') as f:
-    config_yaml = yaml.load(f)
+    config_yaml = yaml.load(f, Loader=yaml.SafeLoader)
     
 db = config_yaml['db']
 

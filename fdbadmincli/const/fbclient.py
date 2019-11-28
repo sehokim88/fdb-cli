@@ -6,7 +6,7 @@ from base64 import b64encode
 
 
 with open(f'{ROOT}/var/config.yaml', 'r') as f:
-    config_yaml = yaml.load(f)
+    config_yaml = yaml.load(f, Loader=yaml.SafeLoader)
 
 app_creds = config_yaml['app']
 
