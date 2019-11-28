@@ -65,13 +65,13 @@ def request_sleep_data(token: dict, start_date: str, end_date: str) -> pd.DataFr
     OUTPUT:
         new_df: a DataFrame of concatenated time-series sleep data within the date range specified.  
     """
-    uuid = token['user_id']
+    fitbit_id = token['fitbit_id']
     access_token = token['access_token']
-    token_type = token['token_type']
+    # token_type = token['token_type']
 
     headers = {
         'content-type' : 'application/json', 
-        'authorization' : token_type + " " + access_token
+        'authorization' : 'Bearer' + " " + access_token
         }
     
     s = datetime.strptime(start_date, '%Y-%m-%d')
@@ -82,7 +82,7 @@ def request_sleep_data(token: dict, start_date: str, end_date: str) -> pd.DataFr
         date_interval = datespace(start_date, end_date, step=100)
         for i_date in date_interval:
             j_date = i_date + timedelta(days=99)
-            endpoint = f'https://api.fitbit.com/1.2/user/{uuid}/sleep/date/{i_date}/{j_date}.json'
+            endpoint = f'https://api.fitbit.com/1.2/user/{fitbit_id}/sleep/date/{i_date}/{j_date}.json'
             res = requests.get(endpoint, headers = headers)
             new_data = json.loads(res.text)
             if 'sleep' in new_data.keys(): 
@@ -95,7 +95,7 @@ def request_sleep_data(token: dict, start_date: str, end_date: str) -> pd.DataFr
         new_df.reset_index(inplace=True, drop=True)
 
     else: 
-        endpoint = f'https://api.fitbit.com/1.2/user/{uuid}/sleep/date/{start_date}/{end_date}.json'
+        endpoint = f'https://api.fitbit.com/1.2/user/{fitbit_id}/sleep/date/{start_date}/{end_date}.json'
         res = requests.get(endpoint, headers = headers)
         new_data = json.loads(res.text)
         

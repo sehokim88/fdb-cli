@@ -18,18 +18,34 @@ from contextlib import closing
 
 
 # search tokens
-token_names = os.listdir(f'{ROOT}/var/tokens')
+# token_names = os.listdir(f'{ROOT}/var/tokens')
 
 
 
-for token_name in token_names:
-    logging.info(f'> Importing {token_name}...') # importing token
-    token_id = token_name[5:-5]
-    with open(f'{ROOT}/var/tokens/token{token_id}.json', 'r') as f: 
-        token = json.load(f)
+# for token_name in token_names:
+#     logging.info(f'> Importing {token_name}...') # importing token
+#     sj_id = token_name[5:-5]
+#     with open(f'{ROOT}/var/tokens/token{sj_id}.json', 'r') as f: 
+#         token = json.load(f)
 
 
+with closing(dbconn.CONN.cursor()) as cur:
 
+    cur.execute(f'''SELECT s.id sj_id, t.access_token access_token, t.refresh_token refresh_token, t.user_id fitbit_id 
+                    FROM tokens t 
+                    JOIN subjects s 
+                    ON t.id = s.token_id;''')
+    tokens = cur.fetchall()
+    fields = [f[0] for f in cur.description]
+    if tokens:
+        pass
+    else:
+        raise Exception
+
+    
+for token in tokens:
+    token = {k:v for k, v in zip(fields, token)}
+    sj_id = token['sj_id']
 
 
 
@@ -51,9 +67,22 @@ for token_name in token_names:
 
         
         if "errors" not in new_token.keys():
-            logging.info('> Dumping a new token...') # dump new token
-            with open(f'{ROOT}/var/tokens/token{token_id}.json', 'w+') as f:
-                json.dump(new_token, f)
+            with closing(dbconn.CONN.cursor()) as cur:
+                logging.info('> Updating new token in tokens table...')
+                cur.execute(f'''UPDATE tokens 
+                                SET access_token = '{new_token['access_token']}'
+                                SET refresh_token = '{new_token['refresh_token']}'
+                                WHERE user_id = '{fitbit_id}' RETURNING id
+                                ''')
+                result = cur.fetchone()
+                if result:
+                    pass
+                else:
+                    raise Exception
+             
+            # logging.info('> Dumping a new token...') # dump new token
+            # with open(f'{ROOT}/var/tokens/token{sj_id}.json', 'w+') as f:
+            #     json.dump(new_token, f)
         else:
             logging.error(f'''{new_token['errors'][0]['message']}''') # failed refreshing token
             sys.exit()
@@ -73,7 +102,7 @@ for token_name in token_names:
         # request current subject's sleep data since the end of the existing records
         logging.info('> Extracting sleep data...') 
         try: 
-            cur.execute(f'''SELECT sj_id FROM sleep WHERE sj_id = '{token_id}';''')
+            cur.execute(f'''SELECT sj_id FROM sleep WHERE sj_id = '{sj_id}';''')
             if cur.fetchone() == None:
                 raise Exception
 
@@ -85,7 +114,7 @@ for token_name in token_names:
             cur.execute(f'''SELECT "end"::date - 1
                             FROM sleep s
                             JOIN subjects sj ON s.sj_id = sj.id
-                            WHERE sj_id = '{token_id}'
+                            WHERE sj_id = '{sj_id}'
                             ORDER BY "end"::date - 1 DESC 
                             LIMIT 1;'''
             )
@@ -130,7 +159,7 @@ for token_name in token_names:
             deep = sleep_null.loc[ind, 'deep']
             awakening = sleep_null.loc[ind, 'awakening']
             cur.execute(f'''INSERT INTO sleep 
-                            VALUES ('{start}','{end}',{light},{rem},{deep},{awakening},'{token_id}')
+                            VALUES ('{start}','{end}',{light},{rem},{deep},{awakening},{sj_id})
                             ON CONFLICT (start) DO NOTHING;'''
             )
     
