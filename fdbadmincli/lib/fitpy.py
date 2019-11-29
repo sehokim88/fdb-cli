@@ -65,7 +65,7 @@ def request_sleep_data(token: dict, start_date: str, end_date: str) -> pd.DataFr
     OUTPUT:
         new_df: a DataFrame of concatenated time-series sleep data within the date range specified.  
     """
-    fitbit_id = token['fitbit_id']
+    fitbit_id = token['user_id']
     access_token = token['access_token']
     # token_type = token['token_type']
 

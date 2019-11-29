@@ -31,7 +31,7 @@ from contextlib import closing
 
 with closing(dbconn.CONN.cursor()) as cur:
 
-    cur.execute(f'''SELECT s.id sj_id, t.access_token access_token, t.refresh_token refresh_token, t.user_id fitbit_id 
+    cur.execute(f'''SELECT s.id sj_id, t.access_token access_token, t.refresh_token refresh_token, t.fitbit_id fitbit_id 
                     FROM tokens t 
                     JOIN subjects s 
                     ON t.id = s.token_id;''')
@@ -73,11 +73,11 @@ for token in tokens:
                 cur.execute(f'''UPDATE tokens 
                                 SET access_token = '{new_token['access_token']}',
                                     refresh_token = '{new_token['refresh_token']}'
-                                WHERE user_id = '{fitbit_id}' RETURNING id
+                                WHERE fitbit_id = '{fitbit_id}' RETURNING id
                                 ''')
                 result = cur.fetchone()
                 if result:
-                    conn.commit()
+                    dbconn.CONN.commit()
                     pass
                 else:
                     raise Exception
