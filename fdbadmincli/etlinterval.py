@@ -71,12 +71,13 @@ for token in tokens:
             with closing(dbconn.CONN.cursor()) as cur:
                 logging.info('> Updating new token in tokens table...')
                 cur.execute(f'''UPDATE tokens 
-                                SET access_token = '{new_token['access_token']}'
-                                SET refresh_token = '{new_token['refresh_token']}'
+                                SET access_token = '{new_token['access_token']}',
+                                    refresh_token = '{new_token['refresh_token']}'
                                 WHERE user_id = '{fitbit_id}' RETURNING id
                                 ''')
                 result = cur.fetchone()
                 if result:
+                    conn.commit()
                     pass
                 else:
                     raise Exception
