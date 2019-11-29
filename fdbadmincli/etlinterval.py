@@ -46,6 +46,7 @@ with closing(dbconn.CONN.cursor()) as cur:
 for token in tokens:
     token = {k:v for k, v in zip(fields, token)}
     sj_id = token['sj_id']
+    fitbit_id = token['fitbit_id']
 
 
 
