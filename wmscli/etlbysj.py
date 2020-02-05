@@ -27,10 +27,11 @@ with open(f'{ROOT}/var/tokens/token{identity.ID}.json', 'r') as f:
 
 
 # check if the token is still valid
+
 today = datetime.today().date()
 try: fitpy.request_sleep_data(token, str(today - timedelta(days=1)), str(today))
 except:
-    logging.info('> token expired, refreshing token...')
+    logging.info('> Token expired, refreshing token...')
     # refresh token
     url = "https://api.fitbit.com/oauth2/token"
     headers = {
