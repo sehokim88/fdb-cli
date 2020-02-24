@@ -15,18 +15,7 @@ import pandas as pd
 from contextlib import closing
 
 
-
-
-# search tokens
-# token_names = os.listdir(f'{ROOT}/var/tokens')
-
-
-
-# for token_name in token_names:
-#     logging.info(f'> Importing {token_name}...') # importing token
-#     sj_id = token_name[5:-5]
-#     with open(f'{ROOT}/var/tokens/token{sj_id}.json', 'r') as f: 
-#         token = json.load(f)
+logging.basicConfig(level=logging.INFO)
 
 
 with closing(dbconn.CONN.cursor()) as cur:
@@ -56,7 +45,7 @@ for token in tokens:
         today = datetime.today().date()
         try: fitpy.request_sleep_data(token, str(today - timedelta(days=1)), str(today))
         except:
-            logging.info('> token expired, refreshing token...') # refresh token
+            logging.debug('> token expired, refreshing token...') # refresh token
             
             url = "https://api.fitbit.com/oauth2/token"
             headers = {
@@ -70,7 +59,7 @@ for token in tokens:
             
             if "errors" not in new_token.keys():
                 with closing(dbconn.CONN.cursor()) as cur:
-                    logging.info('> Updating new token in tokens table...')
+                    logging.debug('> Updating new token in tokens table...')
                     cur.execute(f'''UPDATE tokens 
                                     SET access_token = '{new_token['access_token']}',
                                         refresh_token = '{new_token['refresh_token']}'
@@ -83,7 +72,7 @@ for token in tokens:
                     else:
                         raise Exception
                 
-                # logging.info('> Dumping a new token...') # dump new token
+                # logging.debug('> Dumping a new token...') # dump new token
                 # with open(f'{ROOT}/var/tokens/token{sj_id}.json', 'w+') as f:
                 #     json.dump(new_token, f)
             else:
@@ -99,7 +88,7 @@ for token in tokens:
         with closing(dbconn.CONN.cursor()) as cur:
             # extract sleep data
             # request current subject's sleep data since the end of the existing records
-            logging.info('> Extracting sleep data...') 
+            logging.debug('> Extracting sleep data...') 
             try: 
                 cur.execute(f'''SELECT sj_id FROM sleep WHERE sj_id = '{sj_id}';''')
                 if cur.fetchone() == None:
@@ -129,11 +118,11 @@ for token in tokens:
 
 
         # Transform Sleep Data...
-        logging.info('> Transforming sleep data...') 
+        logging.debug('> Transforming sleep data...') 
         if sleep.shape[0] > 0: 
             sleep = fitpy.parse_sleep_data(sleep)
         else: 
-            logging.info('> No new data...') # No new data
+            logging.debug('> No new data...') # No new data
             sleep = pd.DataFrame()
 
 
@@ -148,7 +137,7 @@ for token in tokens:
 
         with closing(dbconn.CONN.cursor()) as cur:
             # Load Sleep Data
-            logging.info('> Loading sleep data...') 
+            logging.debug('> Loading sleep data...') 
             sleep_null = sleep.fillna('null')
             for ind in range(sleep.shape[0]):
                 start = str(sleep_null.loc[ind, 'start'])
@@ -163,10 +152,12 @@ for token in tokens:
                 )
         
         dbconn.CONN.commit()
+        logging.info(f'''ETL Completed for {sj_id} at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}''')
 
 
 
 
 # Disconnect RDS
-logging.info('> disconnecting DB...')
+logging.debug('> disconnecting DB...')
 dbconn.CONN.close()
+
