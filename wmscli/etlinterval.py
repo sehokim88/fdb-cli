@@ -20,10 +20,16 @@ logging.basicConfig(level=logging.INFO)
 
 with closing(dbconn.CONN.cursor()) as cur:
 
-    cur.execute(f'''SELECT s.id sj_id, t.access_token access_token, t.refresh_token refresh_token, t.fitbit_id fitbit_id 
-                    FROM tokens t 
-                    JOIN subjects s 
-                    ON t.id = s.token_id;''')
+    cur.execute(f'''
+        SELECT 
+            s.id sj_id, 
+            t.access_token, 
+            t.refresh_token, 
+            t.fitbit_id
+        FROM tokens t 
+        JOIN subjects s 
+        ON t.id = s.token_id;
+    ''')
     tokens = cur.fetchall()
     fields = [f[0] for f in cur.description]
     if tokens:
@@ -60,10 +66,12 @@ for token in tokens:
             if "errors" not in new_token.keys():
                 with closing(dbconn.CONN.cursor()) as cur:
                     logging.debug('> Updating new token in tokens table...')
-                    cur.execute(f'''UPDATE tokens 
-                                    SET access_token = '{new_token['access_token']}',
-                                        refresh_token = '{new_token['refresh_token']}'
-                                    WHERE fitbit_id = '{fitbit_id}' RETURNING id
+                    cur.execute(f'''
+                        UPDATE tokens 
+                        SET access_token = '{new_token['access_token']}',
+                            refresh_token = '{new_token['refresh_token']}',
+                            token_insert_date = '{datetime.now()}'
+                        WHERE fitbit_id = '{fitbit_id}' RETURNING id
                                     ''')
                     result = cur.fetchone()
                     if result:
@@ -99,13 +107,14 @@ for token in tokens:
                 sleep = fitpy.request_sleep_data(token, '2019-04-15', str(today))
 
             else:
-                cur.execute(f'''SELECT "end"::date - 1
-                                FROM sleep s
-                                JOIN subjects sj ON s.sj_id = sj.id
-                                WHERE sj_id = '{sj_id}'
-                                ORDER BY "end"::date - 1 DESC 
-                                LIMIT 1;'''
-                )
+                cur.execute(f'''
+                    SELECT "end"::date - 1
+                    FROM sleep s
+                    JOIN subjects sj ON s.sj_id = sj.id
+                    WHERE sj_id = '{sj_id}'
+                    ORDER BY "end"::date - 1 DESC 
+                    LIMIT 1;
+                ''')
                 record_end = str(cur.fetchone()[0])
                 sleep = fitpy.request_sleep_data(token, record_end, str(today))
 
